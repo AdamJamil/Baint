@@ -10,7 +10,8 @@
     <children>
         <HBox prefHeight="100.0" prefWidth="200.0">
          <children>
-            <Button fx:id="newButton" mnemonicParsing="false" onAction="#newButtonPressed" text="New" />
+             <Button fx:id="newButton" mnemonicParsing="false" onAction="#newButtonPressed" text="New" />
+             <Button fx:id="amCar" mnemonicParsing="false" onAction="#amCarPressed" text="New" />
          </children></HBox>
       <ImageView fx:id="imageView" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
       </ImageView>
