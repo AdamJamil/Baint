@@ -37,4 +37,17 @@ public class Controller
 
         // TODO: 8/16/2018 set croppedDisplayImage to UI
     }
+
+    @FXML private void amCarPressed()
+    {
+        try
+        {
+            imageView.setImage(SwingFXUtils.toFXImage(ImageIO.read(new File("C:/Users/adama/Pictures/memes/be emoei.jpg")), null));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        System.out.println("clicky");
+    }
 }
