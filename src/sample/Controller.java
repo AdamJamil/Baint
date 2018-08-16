@@ -2,8 +2,11 @@ package sample;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
-import javafx.scene.image.ImageView;
+import javafx.scene.*;
+import javafx.scene.paint.*;
+import javafx.scene.canvas.*;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -12,14 +15,15 @@ import java.io.File;
 public class Controller
 {
     @FXML Button newButton;
-    @FXML ImageView imageView;
-    @FXML Button amCar;
+    @FXML Canvas canvas;
 
     @FXML private void newButtonPressed()
     {
         try
         {
-            imageView.setImage(SwingFXUtils.toFXImage(ImageIO.read(new File("C:/Users/adama/Pictures/memes/be emoei.jpg")), null));
+            GraphicsContext gc = canvas.getGraphicsContext2D();
+            //Image img = ;
+            gc.drawImage(SwingFXUtils.toFXImage(ImageIO.read(new File("res/icon.png")), null),0,0);
         }
         catch (Exception e)
         {
@@ -28,16 +32,4 @@ public class Controller
         System.out.println("clicky");
     }
 
-    @FXML private void amCarPressed()
-    {
-        try
-        {
-            imageView.setImage(SwingFXUtils.toFXImage(ImageIO.read(new File("C:/Users/adama/Pictures/memes/be emoei.jpg")), null));
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-        System.out.println("no clicky");
-    }
 }
