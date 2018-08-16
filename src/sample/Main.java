@@ -22,6 +22,8 @@ public class Main extends Application
         primaryStage.show();
 
         primaryStage.getIcons().add(SwingFXUtils.toFXImage(ImageIO.read(new File("res/icon.png")), null));
+
+        primaryStage.getScene().getStylesheets().add(Main.class.getResource("res/Stylesheet.css").toExternalForm());
     }
     
     public static void main(String[] args) {

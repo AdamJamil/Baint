@@ -13,6 +13,7 @@ public class Controller
 {
     @FXML Button newButton;
     @FXML ImageView imageView;
+    @FXML Button amCar;
 
     @FXML private void newButtonPressed()
     {
@@ -37,6 +38,6 @@ public class Controller
         {
             e.printStackTrace();
         }
-        System.out.println("clicky");
+        System.out.println("no clicky");
     }
 }
