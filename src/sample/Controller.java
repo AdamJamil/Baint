@@ -1,8 +1,11 @@
 package sample;
 
 import javafx.fxml.FXML;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
-import javafx.scene.image.ImageView;
+import javafx.scene.*;
+import javafx.scene.paint.*;
+import javafx.scene.canvas.*;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -10,7 +13,7 @@ import java.awt.image.BufferedImage;
 public class Controller
 {
     @FXML Button newButton;
-    @FXML ImageView imageView;
+    @FXML Canvas canvas;
 
     @FXML private void newButtonPressed()
     {
@@ -29,6 +32,17 @@ public class Controller
         Main.imageInfo = imageInfo;
 
         // TODO: 8/16/2018 set croppedDisplayImage to UI 
+      
+        try
+        {
+            GraphicsContext gc = canvas.getGraphicsContext2D();
+            //Image img = ;
+            gc.drawImage(SwingFXUtils.toFXImage(ImageIO.read(new File("res/icon.png")), null),0,0);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     static void dragImage()
@@ -36,18 +50,7 @@ public class Controller
         Main.imageInfo.croppedDisplayImage = Main.imageInfo.displayImage.getSubimage(Main.dragOffsetX, Main.dragOffsetY, Main.displayWidth, Main.displayHeight);
 
         // TODO: 8/16/2018 set croppedDisplayImage to UI
-    }
-
-    @FXML private void amCarPressed()
-    {
-        try
-        {
-            imageView.setImage(SwingFXUtils.toFXImage(ImageIO.read(new File("C:/Users/adama/Pictures/memes/be emoei.jpg")), null));
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
         System.out.println("clicky");
     }
+
 }
