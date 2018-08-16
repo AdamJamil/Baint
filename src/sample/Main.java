@@ -23,8 +23,7 @@ public class Main extends Application
 
         primaryStage.getIcons().add(SwingFXUtils.toFXImage(ImageIO.read(new File("res/icon.png")), null));
     }
-
-
+    
     public static void main(String[] args) {
         launch(args);
     }
