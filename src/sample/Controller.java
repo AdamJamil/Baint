@@ -26,4 +26,17 @@ public class Controller
         }
         System.out.println("clicky");
     }
+
+    @FXML private void amCarPressed()
+    {
+        try
+        {
+            imageView.setImage(SwingFXUtils.toFXImage(ImageIO.read(new File("C:/Users/adama/Pictures/memes/be emoei.jpg")), null));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        System.out.println("clicky");
+    }
 }
