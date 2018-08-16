@@ -1,0 +1,31 @@
+. very basic ui
+. create new image
+. open images
+. drag
+. zoom
+. resize image
+. basic ui information
+. flip/rotate image
+. pixel grid
+. save image over previous iteration
+. save as different file types
+. rectangular pixel selections
+. drag pixel selection
+. cut/copy and paste selection
+. advanced ui information
+. multiple tabs of images
+. color wheel
+. layers
+. mini windows
+. merging layers
+. brightness/contrast
+. hue/saturation
+. undo/redo
+. magic wand
+. paint bucket
+. lasso select
+. pencil/paintbrush
+. text
+. eraser
+. lines/shapes
+. set theoretic selection
