@@ -2,8 +2,9 @@ package sample;
 
 import java.awt.image.BufferedImage;
 
-public class ImageInfo
+class ImageInfo
 {
     BufferedImage image;
-
+    BufferedImage displayImage;
+    BufferedImage croppedDisplayImage;
 }
