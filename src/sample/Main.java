@@ -57,7 +57,7 @@ public class Main extends Application
         });
 
         primaryStage.getScene().setOnMouseReleased((e) -> mouseHeld = false);
-        primaryStage.getScene().getStylesheets().add(Main.class.getResource("res/Stylesheet.css").toExternalForm());
+        //primaryStage.getScene().getStylesheets().add(Main.class.getResource("res/Stylesheet.css").toExternalForm());
     }
 
     public static void main(String[] args)

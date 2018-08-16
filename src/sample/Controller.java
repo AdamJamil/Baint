@@ -1,14 +1,20 @@
 package sample;
 
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
 import javafx.scene.*;
+import javafx.scene.image.Image;
 import javafx.scene.paint.*;
 import javafx.scene.canvas.*;
 
+
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.File;
 
 public class Controller
 {
@@ -36,8 +42,8 @@ public class Controller
         try
         {
             GraphicsContext gc = canvas.getGraphicsContext2D();
-            //Image img = ;
-            gc.drawImage(SwingFXUtils.toFXImage(ImageIO.read(new File("res/icon.png")), null),0,0);
+            Image img = SwingFXUtils.toFXImage(ImageIO.read(new File("res/icon.png")), null);
+            gc.drawImage(img,0,0);
         }
         catch (Exception e)
         {
