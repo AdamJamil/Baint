@@ -3,10 +3,9 @@ package sample;
 import javafx.application.Application;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.stage.Screen;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
@@ -14,18 +13,18 @@ import java.io.File;
 
 public class Main extends Application
 {
-    static ImageInfo imageInfo;
-    static int displayWidth = 800;
-    static int displayHeight = 600;
-
     @Override
     public void start(Stage primaryStage) throws Exception
     {
-        Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
-        primaryStage.setTitle("aint");
-        primaryStage.setScene(new Scene(root, 800, 706));
-        primaryStage.show();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("sample.fxml"));
+        Parent root = loader.load();
+        Scene scene = new Scene(root);
+        primaryStage.setScene(scene);
         primaryStage.setMaximized(true);
+        primaryStage.setTitle("aint");
+        primaryStage.getIcons().add(SwingFXUtils.toFXImage(ImageIO.read(new File("res/icon.png")), null));
+
+        ((Controller) loader.getController()).init(primaryStage);
 
         //primaryStage.getScene().getStylesheets().add(Main.class.getResource("res/Stylesheet.css").toExternalForm());
     }

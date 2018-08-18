@@ -5,29 +5,39 @@ import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+
 import java.awt.image.BufferedImage;
 
 public class Controller
 {
+    @FXML BorderPane borderPane;
     @FXML Button newButton;
-    @FXML Canvas canvas;
+    Canvas canvas;
+    CanvasPane canvasPane;
 
-    private static boolean mouseHeld = false;
-    private static double mousePressedX, mousePressedY;
-    static int dragOffsetX = 0;
-    static int dragOffsetY = 0;
+    private boolean mouseHeld = false;
+    private double mousePressedX, mousePressedY;
+    private int dragOffsetX = 0;
+    private int dragOffsetY = 0;
+    
+    private int displayWidth, displayHeight;
 
+    ImageInfo imageInfo;
+    
     @FXML private void newButtonPressed()
     {
-        ImageInfo imageInfo = new ImageInfo();
-        imageInfo.image = new BufferedImage(800, 600, BufferedImage.TYPE_4BYTE_ABGR);
+        imageInfo = new ImageInfo();
+        imageInfo.image = new BufferedImage(displayWidth, displayHeight, BufferedImage.TYPE_4BYTE_ABGR);
 
-        for (int i = 0; i < 800; i++)
-            for (int j = 0; j < 600; j++)
+        for (int i = 0; i < displayWidth; i++)
+            for (int j = 0; j < displayHeight; j++)
                 imageInfo.image.setRGB(i, j, 0xFFFFFFFF);
 
-        imageInfo.displayImage = new BufferedImage(2 * Main.displayWidth + imageInfo.image.getWidth(),
-                                                   2 * Main.displayHeight + imageInfo.image.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+        imageInfo.displayImage = new BufferedImage(2 * displayWidth + imageInfo.image.getWidth(),
+                                                   2 * displayHeight + imageInfo.image.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
 
         for (int i = 0; i < imageInfo.displayImage.getWidth(); i++)
             for (int j = 0; j < imageInfo.displayImage.getHeight(); j++)
@@ -35,53 +45,49 @@ public class Controller
 
         for (int i = -2; i < imageInfo.image.getWidth() + 1; i++)
         {
-            imageInfo.displayImage.setRGB(i + Main.displayWidth, Main.displayHeight - 2, 0xFFD575EA);
-            imageInfo.displayImage.setRGB(i + Main.displayWidth, Main.displayHeight + 1 + imageInfo.image.getHeight(), 0xFFD575EA);
+            imageInfo.displayImage.setRGB(i + displayWidth, displayHeight - 2, 0xFFD575EA);
+            imageInfo.displayImage.setRGB(i + displayWidth, displayHeight + 1 + imageInfo.image.getHeight(), 0xFFD575EA);
         }
 
         for (int i = -2; i < imageInfo.image.getHeight() + 2; i++)
         {
-            imageInfo.displayImage.setRGB(Main.displayWidth - 2, i + Main.displayHeight, 0xFFD575EA);
-            imageInfo.displayImage.setRGB(Main.displayWidth + 1 + imageInfo.image.getWidth(), i + Main.displayHeight, 0xFFD575EA);
+            imageInfo.displayImage.setRGB(displayWidth - 2, i + displayHeight, 0xFFD575EA);
+            imageInfo.displayImage.setRGB(displayWidth + 1 + imageInfo.image.getWidth(), i + displayHeight, 0xFFD575EA);
         }
 
         //DA9BE8
 
         for (int i = -1; i < imageInfo.image.getWidth(); i++)
         {
-            imageInfo.displayImage.setRGB(i + Main.displayWidth, Main.displayHeight - 1, 0xFFDA9BE8);
-            imageInfo.displayImage.setRGB(i + Main.displayWidth, Main.displayHeight + imageInfo.image.getHeight(), 0xFFDA9BE8);
+            imageInfo.displayImage.setRGB(i + displayWidth, displayHeight - 1, 0xFFDA9BE8);
+            imageInfo.displayImage.setRGB(i + displayWidth, displayHeight + imageInfo.image.getHeight(), 0xFFDA9BE8);
         }
 
         for (int i = -1; i < imageInfo.image.getHeight() + 1; i++)
         {
-            imageInfo.displayImage.setRGB(Main.displayWidth - 1, i + Main.displayHeight, 0xFFDA9BE8);
-            imageInfo.displayImage.setRGB(Main.displayWidth + imageInfo.image.getWidth(), i + Main.displayHeight, 0xFFDA9BE8);
+            imageInfo.displayImage.setRGB(displayWidth - 1, i + displayHeight, 0xFFDA9BE8);
+            imageInfo.displayImage.setRGB(displayWidth + imageInfo.image.getWidth(), i + displayHeight, 0xFFDA9BE8);
         }
 
-        imageInfo.displayImage.getGraphics().drawImage(imageInfo.image, Main.displayWidth, Main.displayHeight, null);
+        imageInfo.displayImage.getGraphics().drawImage(imageInfo.image, displayWidth, displayHeight, null);
 
         dragOffsetX = 0;
         dragOffsetY = 0;
 
-        imageInfo.croppedDisplayImage = new BufferedImage(Main.displayWidth, Main.displayHeight, BufferedImage.TYPE_4BYTE_ABGR);
+        imageInfo.croppedDisplayImage = new BufferedImage(displayWidth, displayHeight, BufferedImage.TYPE_4BYTE_ABGR);
 
-        imageInfo.displayImage.getSubimage(dragOffsetX, dragOffsetY, Main.displayWidth, Main.displayHeight).copyData(imageInfo.croppedDisplayImage.getRaster());
+        imageInfo.displayImage.getSubimage(dragOffsetX, dragOffsetY, displayWidth, displayHeight).copyData(imageInfo.croppedDisplayImage.getRaster());
 
-        Main.imageInfo = imageInfo;
-
-        canvas.setWidth(800);
-        canvas.setHeight(600);
         canvas.getGraphicsContext2D().drawImage(SwingFXUtils.toFXImage(imageInfo.croppedDisplayImage, null), 0, 0);
     }
 
     void dragImage()
     {
-        Main.imageInfo.croppedDisplayImage.getGraphics().clearRect(0, 0, 800, 600);
-        Main.imageInfo.displayImage.getSubimage(dragOffsetX, dragOffsetY, Main.displayWidth, Main.displayHeight).copyData(Main.imageInfo.croppedDisplayImage.getRaster());
+        imageInfo.croppedDisplayImage.getGraphics().clearRect(0, 0, displayWidth, displayHeight);
+        imageInfo.displayImage.getSubimage(dragOffsetX, dragOffsetY, displayWidth, displayHeight).copyData(imageInfo.croppedDisplayImage.getRaster());
 
-        canvas.getGraphicsContext2D().clearRect(0, 0, Main.displayWidth, Main.displayHeight);
-        canvas.getGraphicsContext2D().drawImage(SwingFXUtils.toFXImage(Main.imageInfo.croppedDisplayImage, null), 0, 0);
+        canvas.getGraphicsContext2D().clearRect(0, 0, displayWidth, displayHeight);
+        canvas.getGraphicsContext2D().drawImage(SwingFXUtils.toFXImage(imageInfo.croppedDisplayImage, null), 0, 0);
 
         System.out.println(dragOffsetX + ", " + dragOffsetY);
     }
@@ -104,19 +110,35 @@ public class Controller
             mousePressedX = e.getX();
             mousePressedY = e.getY();
 
-            if (Main.imageInfo == null || Main.imageInfo.displayImage == null)
+            if (imageInfo == null || imageInfo.displayImage == null)
                 return;
 
-            dragOffsetX = Math.max(50, Math.min(dragOffsetX, Main.imageInfo.displayImage.getWidth() - Main.displayWidth - 50));
-            dragOffsetY = Math.max(50, Math.min(dragOffsetY, Main.imageInfo.displayImage.getHeight() - Main.displayHeight - 50));
+            dragOffsetX = Math.max(50, Math.min(dragOffsetX, imageInfo.displayImage.getWidth() - displayWidth - 50));
+            dragOffsetY = Math.max(50, Math.min(dragOffsetY, imageInfo.displayImage.getHeight() - displayHeight - 50));
 
             dragImage();
         }
     }
 
     @FXML
-    private void mouseReleased()
+    private void mouseReleased(MouseEvent e)
     {
         mouseHeld = false;
+    }
+
+    void init(Stage primaryStage)
+    {
+        primaryStage.show();
+
+        canvasPane = new CanvasPane(primaryStage.getScene().getWidth(), primaryStage.getScene().getHeight() - 100);
+        borderPane.setOnMousePressed(this::mousePressed);
+        borderPane.setOnMouseDragged(this::mouseDragged);
+        borderPane.setOnMouseReleased(this::mouseReleased);
+        canvas = canvasPane.getCanvas();
+
+        borderPane.setCenter(canvasPane);
+
+        displayHeight = (int) primaryStage.getScene().getHeight() - 100;
+        displayWidth = (int) primaryStage.getScene().getWidth();
     }
 }
