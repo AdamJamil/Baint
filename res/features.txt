@@ -1,7 +1,7 @@
 💯💯🔥🔥 1. very basic ui
 💯💯🔥🔥 2. create new image
 💯💯🔥🔥 3. open images
-4. drag
+💯💯🔥🔥 4. drag
 5. zoom
 6. resize image
 7. basic ui information
