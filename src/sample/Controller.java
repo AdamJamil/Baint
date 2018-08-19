@@ -37,6 +37,16 @@ public class Controller
 
     ImageInfo imageInfo;
 
+    @FXML private void resizeButtonPressed()
+    {
+        ResizeResult result = (new ResizeDialog(imageInfo.image.getWidth(), imageInfo.image.getHeight())).showAndWait().get();
+        if (result.error.isEmpty())
+            imageInfo.image = applyZoom(imageInfo.image, result.newX / imageInfo.image.getWidth(), result.newY / imageInfo.image.getHeight());
+        // TODO: 8/19/2018 error handling
+
+        processDisplayImage();
+    }
+
     @FXML private void openButtonPressed() throws Exception
     {
         File file = new FileChooser().showOpenDialog(stage);
@@ -70,7 +80,7 @@ public class Controller
 
     void processDisplayImage()
     {
-        BufferedImage zoomImage = applyZoom(imageInfo.image);
+        BufferedImage zoomImage = applyZoom(imageInfo.image, zoomLevels[zoomLevel], zoomLevels[zoomLevel]);
         imageInfo.displayImage = new BufferedImage(4 + zoomImage.getWidth(), 4 + zoomImage.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
 
         for (int i = 0; i < imageInfo.displayImage.getWidth(); i++)
@@ -119,11 +129,11 @@ public class Controller
         canvas.getGraphicsContext2D().drawImage(imageInfo.fxImage, dragOffsetX, dragOffsetY);
     }
 
-    BufferedImage applyZoom(BufferedImage input)
+    BufferedImage applyZoom(BufferedImage input, double scaleFactorX, double scaleFactorY)
     {
         AffineTransform affineTransform = new AffineTransform();
-        affineTransform.scale(zoomLevels[zoomLevel], zoomLevels[zoomLevel]);
-        AffineTransformOp op = new AffineTransformOp(affineTransform, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+        affineTransform.scale(scaleFactorX, scaleFactorY);
+        AffineTransformOp op = new AffineTransformOp(affineTransform, AffineTransformOp.TYPE_BILINEAR);
         return op.filter(input, null);
     }
 
