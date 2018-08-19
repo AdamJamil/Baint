@@ -12,6 +12,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
@@ -27,8 +29,9 @@ public class Controller
     private double mousePressedX, mousePressedY;
     private int dragOffsetX = 0;
     private int dragOffsetY = 0;
-    private int zoomLevel = 0;
+    private int zoomLevel = 9;
     private double[] zoomLevels = new double[]{0.01, 0.05, 0.1, 0.25, 0.33, 0.5, 0.75, 0.8, 0.9, 1, 1.1, 1.2, 1.4, 1.8, 2.5, 3, 3.5, 4, 5, 6, 7, 8, 9};
+    private int imageCenterX, imageCenterY;
     
     private int displayWidth, displayHeight;
 
@@ -56,7 +59,19 @@ public class Controller
         imageInfo = new ImageInfo();
         imageInfo.image = input;
 
-        imageInfo.displayImage = new BufferedImage(4 + imageInfo.image.getWidth(), 4 + imageInfo.image.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+        dragOffsetX = (displayWidth - input.getWidth() - 4) / 2;
+        dragOffsetY = (displayHeight - input.getHeight() - 4) / 2;
+
+        imageCenterX = displayWidth / 2;
+        imageCenterY = displayHeight / 2;
+
+        processDisplayImage();
+    }
+
+    void processDisplayImage()
+    {
+        BufferedImage zoomImage = applyZoom(imageInfo.image);
+        imageInfo.displayImage = new BufferedImage(4 + zoomImage.getWidth(), 4 + zoomImage.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
 
         for (int i = 0; i < imageInfo.displayImage.getWidth(); i++)
             for (int j = 0; j < imageInfo.displayImage.getHeight(); j++)
@@ -88,23 +103,40 @@ public class Controller
             imageInfo.displayImage.setRGB(imageInfo.displayImage.getWidth() - 2, i, 0xFFDA9BE8);
         }
 
-        imageInfo.displayImage.getGraphics().drawImage(imageInfo.image, 2, 2, null);
-
-        dragOffsetX = (displayWidth - imageInfo.image.getWidth()) / 2;
-        dragOffsetY = (displayHeight - imageInfo.image.getHeight()) / 2;
+        imageInfo.displayImage.getGraphics().drawImage(zoomImage, 2, 2, null);
 
         canvas.getGraphicsContext2D().clearRect(0, 0, displayWidth, displayHeight);
         canvas.getGraphicsContext2D().drawImage(SwingFXUtils.toFXImage(imageInfo.displayImage, null), dragOffsetX, dragOffsetY);
 
         imageInfo.fxImage = SwingFXUtils.toFXImage(imageInfo.displayImage, null);
+
+        drawImage();
     }
 
-    void dragImage()
+    void drawImage()
     {
         canvas.getGraphicsContext2D().clearRect(0, 0, displayWidth, displayHeight);
         canvas.getGraphicsContext2D().drawImage(imageInfo.fxImage, dragOffsetX, dragOffsetY);
+    }
 
-        System.out.println(dragOffsetX + ", " + dragOffsetY);
+    BufferedImage applyZoom(BufferedImage input)
+    {
+        AffineTransform affineTransform = new AffineTransform();
+        affineTransform.scale(zoomLevels[zoomLevel], zoomLevels[zoomLevel]);
+        AffineTransformOp op = new AffineTransformOp(affineTransform, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+        return op.filter(input, null);
+    }
+
+    @FXML
+    private void mouseScroll(ScrollEvent e)
+    {
+        zoomLevel += (e.getDeltaY() > 0) ? 1 : -1;
+        zoomLevel = Math.max(0, Math.min(zoomLevel, 23));
+
+        dragOffsetX = imageCenterX - ((int) (zoomLevels[zoomLevel] * imageInfo.image.getWidth() / 2));
+        dragOffsetY = imageCenterY - ((int) (zoomLevels[zoomLevel] * imageInfo.image.getHeight() / 2));
+
+        processDisplayImage();
     }
 
     @FXML
@@ -128,17 +160,16 @@ public class Controller
             if (imageInfo == null || imageInfo.displayImage == null)
                 return;
 
-            dragOffsetX = Math.max(-imageInfo.image.getWidth() + 50, Math.min(dragOffsetX, displayWidth - 50));
-            dragOffsetY = Math.max(-imageInfo.image.getHeight() + 50, Math.min(dragOffsetY, displayHeight - 50));
+            dragOffsetX = Math.max((int) -imageInfo.fxImage.getWidth() + 50, Math.min(dragOffsetX, displayWidth - 50));
+            dragOffsetY = Math.max((int) -imageInfo.fxImage.getHeight() + 50, Math.min(dragOffsetY, displayHeight - 50));
 
-            dragImage();
+            imageCenterX = dragOffsetX + (int) imageInfo.fxImage.getWidth() / 2;
+            imageCenterY = dragOffsetY + (int) imageInfo.fxImage.getHeight() / 2;
+
+            System.out.println(dragOffsetX + ", " + dragOffsetY);
+
+            drawImage();
         }
-    }
-
-    @FXML
-    private void mouseScroll(ScrollEvent e)
-    {
-        zoomLevel += (e.getDeltaY() > 0) ? 1 : -1;
     }
 
     @FXML
