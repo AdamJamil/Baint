@@ -10,6 +10,7 @@
       <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
              <Button fx:id="newButton" mnemonicParsing="false" onAction="#newButtonPressed" text="New" />
+             <Button fx:id="openButton" mnemonicParsing="false" onAction="#openButtonPressed" text="Open" />
          </children>
       </HBox>
    </top>

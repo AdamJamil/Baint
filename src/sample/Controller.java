@@ -5,11 +5,14 @@ import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.File;
 
 public class Controller
 {
@@ -17,6 +20,7 @@ public class Controller
     @FXML Button newButton;
     Canvas canvas;
     CanvasPane canvasPane;
+    Stage stage;
 
     private boolean mouseHeld = false;
     private double mousePressedX, mousePressedY;
@@ -26,18 +30,31 @@ public class Controller
     private int displayWidth, displayHeight;
 
     ImageInfo imageInfo;
+
+    @FXML private void openButtonPressed() throws Exception
+    {
+        File file = new FileChooser().showOpenDialog(stage);
+        loadImage(ImageIO.read(file));
+    }
     
     @FXML private void newButtonPressed()
     {
-        imageInfo = new ImageInfo();
-        imageInfo.image = new BufferedImage(displayWidth, displayHeight, BufferedImage.TYPE_4BYTE_ABGR);
+        BufferedImage image = new BufferedImage(displayWidth / 2, displayHeight / 2, BufferedImage.TYPE_4BYTE_ABGR);
 
-        for (int i = 0; i < displayWidth; i++)
-            for (int j = 0; j < displayHeight; j++)
-                imageInfo.image.setRGB(i, j, 0xFFFFFFFF);
+        for (int i = 0; i < displayWidth / 2; i++)
+            for (int j = 0; j < displayHeight / 2; j++)
+                image.setRGB(i, j, 0xFFFFFFFF);
+
+        loadImage(image);
+    }
+
+    void loadImage(BufferedImage input)
+    {
+        imageInfo = new ImageInfo();
+        imageInfo.image = input;
 
         imageInfo.displayImage = new BufferedImage(2 * displayWidth + imageInfo.image.getWidth(),
-                                                   2 * displayHeight + imageInfo.image.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+                2 * displayHeight + imageInfo.image.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
 
         for (int i = 0; i < imageInfo.displayImage.getWidth(); i++)
             for (int j = 0; j < imageInfo.displayImage.getHeight(); j++)
@@ -69,16 +86,16 @@ public class Controller
             imageInfo.displayImage.setRGB(displayWidth + imageInfo.image.getWidth(), i + displayHeight, 0xFFDA9BE8);
         }
 
+        dragOffsetX = -(displayWidth - imageInfo.displayImage.getWidth()) / 2;
+        dragOffsetY = -(displayHeight - imageInfo.displayImage.getHeight()) / 2;
+
         imageInfo.displayImage.getGraphics().drawImage(imageInfo.image, displayWidth, displayHeight, null);
-
-        dragOffsetX = 0;
-        dragOffsetY = 0;
-
         imageInfo.croppedDisplayImage = new BufferedImage(displayWidth, displayHeight, BufferedImage.TYPE_4BYTE_ABGR);
-
         imageInfo.displayImage.getSubimage(dragOffsetX, dragOffsetY, displayWidth, displayHeight).copyData(imageInfo.croppedDisplayImage.getRaster());
 
+        canvas.getGraphicsContext2D().clearRect(0, 0, displayWidth, displayHeight);
         canvas.getGraphicsContext2D().drawImage(SwingFXUtils.toFXImage(imageInfo.croppedDisplayImage, null), 0, 0);
+
     }
 
     void dragImage()
@@ -126,19 +143,22 @@ public class Controller
         mouseHeld = false;
     }
 
-    void init(Stage primaryStage)
+    void init(Stage stage)
     {
-        primaryStage.show();
+        this.stage = stage;
+        stage.show();
 
-        canvasPane = new CanvasPane(primaryStage.getScene().getWidth(), primaryStage.getScene().getHeight() - 100);
+        canvasPane = new CanvasPane(stage.getScene().getWidth(), stage.getScene().getHeight() - 100);
         borderPane.setOnMousePressed(this::mousePressed);
         borderPane.setOnMouseDragged(this::mouseDragged);
         borderPane.setOnMouseReleased(this::mouseReleased);
         canvas = canvasPane.getCanvas();
 
         borderPane.setCenter(canvasPane);
+        canvasPane.setBorder(new Border(new BorderStroke(Color.BLACK,
+                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(4))));
 
-        displayHeight = (int) primaryStage.getScene().getHeight() - 100;
-        displayWidth = (int) primaryStage.getScene().getWidth();
+        displayHeight = (int) stage.getScene().getHeight() - 100;
+        displayWidth = (int) stage.getScene().getWidth();
     }
 }
