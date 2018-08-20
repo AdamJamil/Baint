@@ -3,6 +3,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Text?>
 
 <BorderPane fx:id="borderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
    <top>
@@ -11,6 +12,7 @@
              <Button fx:id="newButton" mnemonicParsing="false" onAction="#newButtonPressed" text="New" />
              <Button fx:id="openButton" mnemonicParsing="false" onAction="#openButtonPressed" text="Open" />
             <Button mnemonicParsing="false" onAction="#resizeButtonPressed" text="Resize" />
+            <Text fx:id="mouseInfo" strokeType="OUTSIDE" strokeWidth="0.0" />
          </children>
       </HBox>
    </top>

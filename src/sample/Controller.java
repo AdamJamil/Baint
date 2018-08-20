@@ -8,6 +8,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -21,14 +22,15 @@ public class Controller
 {
     @FXML BorderPane borderPane;
     @FXML Button newButton;
+    @FXML Text mouseInfo;
     Canvas canvas;
     CanvasPane canvasPane;
     Stage stage;
 
     private boolean mouseHeld = false;
+    private double mouseX, mouseY;
     private double mousePressedX, mousePressedY;
-    private int dragOffsetX = 0;
-    private int dragOffsetY = 0;
+    private int dragOffsetX = 0, dragOffsetY = 0;
     private int zoomLevel = 9;
     private double[] zoomLevels = new double[]{0.01, 0.05, 0.1, 0.25, 0.33, 0.5, 0.75, 0.8, 0.9, 1, 1.1, 1.2, 1.4, 1.8, 2.5, 3, 3.5, 4, 5, 6, 7, 8, 9};
     private int imageCenterX, imageCenterY;
@@ -41,7 +43,7 @@ public class Controller
     {
         ResizeResult result = (new ResizeDialog(imageInfo.image.getWidth(), imageInfo.image.getHeight())).showAndWait().get();
         if (result.error.isEmpty())
-            imageInfo.image = applyZoom(imageInfo.image, result.newX / imageInfo.image.getWidth(), result.newY / imageInfo.image.getHeight());
+            imageInfo.image = applyZoom(imageInfo.image, result.newX / imageInfo.image.getWidth(), result.newY / imageInfo.image.getHeight(), AffineTransformOp.TYPE_BICUBIC);
         // TODO: 8/19/2018 error handling
 
         processDisplayImage();
@@ -80,7 +82,7 @@ public class Controller
 
     void processDisplayImage()
     {
-        BufferedImage zoomImage = applyZoom(imageInfo.image, zoomLevels[zoomLevel], zoomLevels[zoomLevel]);
+        BufferedImage zoomImage = applyZoom(imageInfo.image, zoomLevels[zoomLevel], zoomLevels[zoomLevel], AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
         imageInfo.displayImage = new BufferedImage(4 + zoomImage.getWidth(), 4 + zoomImage.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
 
         for (int i = 0; i < imageInfo.displayImage.getWidth(); i++)
@@ -129,11 +131,11 @@ public class Controller
         canvas.getGraphicsContext2D().drawImage(imageInfo.fxImage, dragOffsetX, dragOffsetY);
     }
 
-    BufferedImage applyZoom(BufferedImage input, double scaleFactorX, double scaleFactorY)
+    BufferedImage applyZoom(BufferedImage input, double scaleFactorX, double scaleFactorY, int renderingType)
     {
         AffineTransform affineTransform = new AffineTransform();
         affineTransform.scale(scaleFactorX, scaleFactorY);
-        AffineTransformOp op = new AffineTransformOp(affineTransform, AffineTransformOp.TYPE_BILINEAR);
+        AffineTransformOp op = new AffineTransformOp(affineTransform, renderingType);
         return op.filter(input, null);
     }
 
@@ -141,7 +143,7 @@ public class Controller
     private void mouseScroll(ScrollEvent e)
     {
         zoomLevel += (e.getDeltaY() > 0) ? 1 : -1;
-        zoomLevel = Math.max(0, Math.min(zoomLevel, 23));
+        zoomLevel = Math.max(0, Math.min(zoomLevel, 22));
 
         dragOffsetX = imageCenterX - ((int) (zoomLevels[zoomLevel] * imageInfo.image.getWidth() / 2));
         dragOffsetY = imageCenterY - ((int) (zoomLevels[zoomLevel] * imageInfo.image.getHeight() / 2));
@@ -188,6 +190,29 @@ public class Controller
         mouseHeld = false;
     }
 
+    @FXML private void mouseMoved(MouseEvent e)
+    {
+        if (imageInfo == null)
+            return;
+
+        mouseX = e.getX() - 6;
+        mouseY = e.getY() - 6 - 100;
+
+        if (dragOffsetX <= mouseX && mouseX < dragOffsetX + imageInfo.fxImage.getWidth() - 4)
+            if (dragOffsetY <= mouseY && mouseY < dragOffsetY + imageInfo.fxImage.getHeight() - 4)
+            {
+                int pixelX = (int) ((mouseX - dragOffsetX) / zoomLevels[zoomLevel]);
+                int pixelY = (int) ((mouseY - dragOffsetY) / zoomLevels[zoomLevel]);
+                mouseInfo.setText(pixelX + ", " + pixelY);
+
+                if (e.isAltDown())
+                {
+                    imageInfo.image.setRGB(pixelX, pixelY, 0xFF000000);
+                    processDisplayImage();
+                }
+            }
+    }
+
     void init(Stage stage)
     {
         this.stage = stage;
@@ -198,6 +223,7 @@ public class Controller
         borderPane.setOnMouseDragged(this::mouseDragged);
         borderPane.setOnMouseReleased(this::mouseReleased);
         borderPane.setOnScroll(this::mouseScroll);
+        borderPane.setOnMouseMoved(this::mouseMoved);
         canvas = canvasPane.getCanvas();
 
         borderPane.setCenter(canvasPane);

@@ -3,7 +3,7 @@
 💯💯🔥🔥 3. open images
 💯💯🔥🔥 4. drag
 💯💯🔥🔥 5. zoom
-6. resize image
+💯💯🔥🔥 6. resize image
 7. basic ui information
 8. flip/rotate image
 9. pixel grid
