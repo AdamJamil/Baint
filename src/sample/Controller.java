@@ -105,7 +105,7 @@ public class Controller
 
         resizePixels(((DataBufferInt) imageInfo.image.getRaster().getDataBuffer()).getData(), ((DataBufferInt) imageInfo.displayImage.getRaster().getDataBuffer()).getData(),
                 imageInfo.image.getWidth(), imageInfo.image.getHeight(), (int) (imageInfo.image.getWidth() * zoom), (int) (imageInfo.image.getHeight() * zoom));
-        
+
         drawImage();
     }
 
@@ -170,8 +170,8 @@ public class Controller
             dragOffsetX = Math.max((int) (zoom * -imageInfo.displayImage.getWidth() + 50), Math.min(dragOffsetX, displayWidth - 50));
             dragOffsetY = Math.max((int) (zoom * -imageInfo.displayImage.getHeight() + 50), Math.min(dragOffsetY, displayHeight - 50));
 
-            imageCenterX = dragOffsetX + (int) (imageInfo.displayImage.getWidth() / 2);
-            imageCenterY = dragOffsetY + (int) (imageInfo.displayImage.getHeight() / 2);
+            imageCenterX = dragOffsetX + (imageInfo.displayImage.getWidth() / 2);
+            imageCenterY = dragOffsetY + (imageInfo.displayImage.getHeight() / 2);
 
             drawImage();
         }
@@ -191,8 +191,6 @@ public class Controller
         mouseX = e.getX();
         mouseY = e.getY();
 
-        long time = System.nanoTime();
-
         if (dragOffsetX + 2 <= mouseX && mouseX < dragOffsetX + imageInfo.displayImage.getWidth() - 2)
             if (dragOffsetY + 2 <= mouseY && mouseY < dragOffsetY + imageInfo.displayImage.getHeight() - 2)
             {
@@ -202,15 +200,12 @@ public class Controller
 
                 if (e.isAltDown())
                 {
-                    System.out.println(System.nanoTime() - time);
                     imageInfo.image.setRGB(pixelX, pixelY, 0xFF000000);
                     for (double i = pixelX * zoom; i <= (pixelX + 1) * zoom; i++)
                         for (double j = pixelY * zoom; j <= (pixelY + 1) * zoom; j++)
                             imageInfo.displayImage.setRGB((int) i, (int) j, 0xFF000000);
 
                     drawImage();
-                    System.out.println(System.nanoTime() - time);
-                    System.out.println();
                 }
             }
     }
