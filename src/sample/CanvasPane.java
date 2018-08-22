@@ -5,16 +5,15 @@ import javafx.scene.layout.Pane;
 
 class CanvasPane extends Pane
 {
-
     private final Canvas canvas;
 
-    public CanvasPane(double width, double height)
+    CanvasPane(double width, double height)
     {
         canvas = new Canvas(width, height);
         getChildren().add(canvas);
     }
 
-    public Canvas getCanvas()
+    Canvas getCanvas()
     {
         return canvas;
     }
