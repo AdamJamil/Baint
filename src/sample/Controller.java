@@ -2,12 +2,10 @@ package sample;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -26,20 +24,20 @@ public class Controller
     @FXML Button newButton;
     @FXML Text mouseInfo;
     Canvas canvas;
-    CanvasPane canvasPane;
+    CustomJPanel customJPanel;
     Stage stage;
 
     private boolean mouseHeld = false;
     private double mouseX, mouseY;
     private double mousePressedX, mousePressedY;
-    private int dragOffsetX = 0, dragOffsetY = 0;
+    int dragOffsetX = 0, dragOffsetY = 0;
     private int zoomLevel = 14;
     private double[] zoomLevels = new double[]{0.01, 0.05, 0.1, 0.25, 0.33, 0.5, 0.75, 0.8, 0.9, 1, 1.1, 1.2, 1.4, 1.8, 2.5, 3, 3.5, 4, 5, 6, 7, 8, 9};
     private int imageCenterX, imageCenterY;
     private double zoom = zoomLevels[zoomLevel];
     private BufferedImage zoomImage;
 
-    private int displayWidth, displayHeight;
+    int displayWidth, displayHeight;
 
     ImageInfo imageInfo;
 
@@ -107,16 +105,13 @@ public class Controller
 
         resizePixels(((DataBufferInt) imageInfo.image.getRaster().getDataBuffer()).getData(), ((DataBufferInt) imageInfo.displayImage.getRaster().getDataBuffer()).getData(),
                 imageInfo.image.getWidth(), imageInfo.image.getHeight(), (int) (imageInfo.image.getWidth() * zoom), (int) (imageInfo.image.getHeight() * zoom));
-
-        imageInfo.fxImage = SwingFXUtils.toFXImage(imageInfo.displayImage, null);
-
+        
         drawImage();
     }
 
     void drawImage()
     {
-        canvas.getGraphicsContext2D().clearRect(0, 0, displayWidth, displayHeight);
-        canvas.getGraphicsContext2D().drawImage(imageInfo.fxImage, dragOffsetX, dragOffsetY);
+        customJPanel.repaint();
     }
 
     BufferedImage applyZoom(BufferedImage input, double scaleFactorX, double scaleFactorY, int renderingType)
@@ -172,11 +167,11 @@ public class Controller
             if (imageInfo == null || imageInfo.displayImage == null)
                 return;
 
-            dragOffsetX = Math.max((int) (zoom * -imageInfo.fxImage.getWidth() + 50), Math.min(dragOffsetX, displayWidth - 50));
-            dragOffsetY = Math.max((int) (zoom * -imageInfo.fxImage.getHeight() + 50), Math.min(dragOffsetY, displayHeight - 50));
+            dragOffsetX = Math.max((int) (zoom * -imageInfo.displayImage.getWidth() + 50), Math.min(dragOffsetX, displayWidth - 50));
+            dragOffsetY = Math.max((int) (zoom * -imageInfo.displayImage.getHeight() + 50), Math.min(dragOffsetY, displayHeight - 50));
 
-            imageCenterX = dragOffsetX + (int) (imageInfo.fxImage.getWidth() / 2);
-            imageCenterY = dragOffsetY + (int) (imageInfo.fxImage.getHeight() / 2);
+            imageCenterX = dragOffsetX + (int) (imageInfo.displayImage.getWidth() / 2);
+            imageCenterY = dragOffsetY + (int) (imageInfo.displayImage.getHeight() / 2);
 
             drawImage();
         }
@@ -193,13 +188,13 @@ public class Controller
         if (imageInfo == null)
             return;
 
-        mouseX = e.getX() - 4;
-        mouseY = e.getY() - 4 - 100;
+        mouseX = e.getX();
+        mouseY = e.getY();
 
         long time = System.nanoTime();
 
-        if (dragOffsetX + 2 <= mouseX && mouseX < dragOffsetX + imageInfo.fxImage.getWidth() - 2)
-            if (dragOffsetY + 2 <= mouseY && mouseY < dragOffsetY + imageInfo.fxImage.getHeight() - 2)
+        if (dragOffsetX + 2 <= mouseX && mouseX < dragOffsetX + imageInfo.displayImage.getWidth() - 2)
+            if (dragOffsetY + 2 <= mouseY && mouseY < dragOffsetY + imageInfo.displayImage.getHeight() - 2)
             {
                 int pixelX = (int) ((mouseX - dragOffsetX - 2) / zoomLevels[zoomLevel]);
                 int pixelY = (int) ((mouseY - dragOffsetY - 2) / zoomLevels[zoomLevel]);
@@ -213,7 +208,6 @@ public class Controller
                         for (double j = pixelY * zoom; j <= (pixelY + 1) * zoom; j++)
                             imageInfo.displayImage.setRGB((int) i, (int) j, 0xFF000000);
 
-                    imageInfo.fxImage = SwingFXUtils.toFXImage(imageInfo.displayImage, null);
                     drawImage();
                     System.out.println(System.nanoTime() - time);
                     System.out.println();
@@ -244,20 +238,20 @@ public class Controller
         this.stage = stage;
         stage.show();
 
-        canvasPane = new CanvasPane(stage.getScene().getWidth(), stage.getScene().getHeight() - 100);
-        borderPane.setOnMousePressed(this::mousePressed);
-        borderPane.setOnMouseDragged(this::mouseDragged);
-        borderPane.setOnMouseReleased(this::mouseReleased);
-        borderPane.setOnScroll(this::mouseScroll);
-        borderPane.setOnMouseMoved(this::mouseMoved);
+        customJPanel = new CustomJPanel(this);
+        customJPanel.swingNode.setOnMousePressed(this::mousePressed);
+        customJPanel.swingNode.setOnMouseDragged(this::mouseDragged);
+        customJPanel.swingNode.setOnMouseReleased(this::mouseReleased);
+        customJPanel.swingNode.setOnScroll(this::mouseScroll);
+        customJPanel.swingNode.setOnMouseMoved(this::mouseMoved);
 
-        canvas = canvasPane.getCanvas();
+        canvas = customJPanel.getCanvas();
 
-        borderPane.setCenter(canvasPane);
-        canvasPane.setBorder(new Border(new BorderStroke(Color.BLACK,
-                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(4))));
+        borderPane.setCenter(customJPanel.swingNode);
 
         displayHeight = (int) stage.getScene().getHeight() - 100;
         displayWidth = (int) stage.getScene().getWidth();
+
+        canvas.setPreferredSize(new Dimension(displayWidth, displayHeight));
     }
 }

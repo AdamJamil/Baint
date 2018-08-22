@@ -8,5 +8,4 @@ class ImageInfo
 {
     BufferedImage image;
     BufferedImage displayImage;
-    Image fxImage;
 }
