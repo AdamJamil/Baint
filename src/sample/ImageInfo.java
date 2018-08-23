@@ -1,11 +1,11 @@
 package sample;
 
-import javafx.scene.image.Image;
-
 import java.awt.image.BufferedImage;
+import java.io.File;
 
 class ImageInfo
 {
     BufferedImage image;
     BufferedImage displayImage;
+    File file;
 }

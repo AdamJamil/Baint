@@ -17,12 +17,16 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.File;
+import java.nio.Buffer;
 
 public class Controller
 {
-    @FXML BorderPane borderPane;
-    @FXML Button newButton;
-    @FXML Text mouseInfo;
+    @FXML
+    BorderPane borderPane;
+    @FXML
+    Button newButton;
+    @FXML
+    Text mouseInfo;
     Canvas canvas;
     CustomJPanel customJPanel;
     Stage stage;
@@ -41,7 +45,8 @@ public class Controller
 
     ImageInfo imageInfo;
 
-    @FXML private void resizeButtonPressed()
+    @FXML
+    private void resizeButtonPressed()
     {
         ResizeResult result = (new ResizeDialog(imageInfo.image.getWidth(), imageInfo.image.getHeight())).showAndWait().get();
         if (result.error.isEmpty())
@@ -55,13 +60,15 @@ public class Controller
         processDisplayImage();
     }
 
-    @FXML private void openButtonPressed() throws Exception
+    @FXML
+    private void openButtonPressed() throws Exception
     {
         File file = new FileChooser().showOpenDialog(stage);
         loadImage(ImageIO.read(file));
     }
-    
-    @FXML private void newButtonPressed()
+
+    @FXML
+    private void newButtonPressed()
     {
         BufferedImage image = new BufferedImage(displayWidth / 2, displayHeight / 2, BufferedImage.TYPE_INT_ARGB);
 
@@ -81,8 +88,7 @@ public class Controller
         dragOffsetX = (displayWidth - input.getWidth() - 4) / 2;
         dragOffsetY = (displayHeight - input.getHeight() - 4) / 2;
 
-        imageCenterX = displayWidth / 2;
-        imageCenterY = displayHeight / 2;
+        resetCenter();
 
         processDisplayImage();
     }
@@ -93,24 +99,11 @@ public class Controller
             zoomImage = new BufferedImage((int) (imageInfo.image.getWidth() * zoom), (int) (imageInfo.image.getHeight() * zoom), BufferedImage.TYPE_INT_ARGB);
 
         if (imageInfo.displayImage == null)
-        {
-            imageInfo.displayImage = new BufferedImage(4 + (int) (zoom * imageInfo.image.getWidth()), 4 + (int) (zoom * imageInfo.image.getHeight()), BufferedImage.TYPE_INT_ARGB);
-
-            Graphics graphics = imageInfo.displayImage.getGraphics();
-            graphics.setColor(new java.awt.Color(0xFFD575EA));
-            graphics.drawRect(0, 0, imageInfo.displayImage.getWidth() - 1, imageInfo.displayImage.getHeight() - 1);
-            graphics.setColor(new java.awt.Color(0xFFDA9BE8));
-            graphics.drawRect(1, 1, imageInfo.displayImage.getWidth() - 3, imageInfo.displayImage.getHeight() - 3);
-        }
+            resetDisplayImage();
 
         resizePixels(((DataBufferInt) imageInfo.image.getRaster().getDataBuffer()).getData(), ((DataBufferInt) imageInfo.displayImage.getRaster().getDataBuffer()).getData(),
                 imageInfo.image.getWidth(), imageInfo.image.getHeight(), (int) (imageInfo.image.getWidth() * zoom), (int) (imageInfo.image.getHeight() * zoom));
 
-        drawImage();
-    }
-
-    void drawImage()
-    {
         customJPanel.repaint();
     }
 
@@ -135,13 +128,7 @@ public class Controller
         dragOffsetX = imageCenterX - ((int) (zoom * imageInfo.image.getWidth() / 2));
         dragOffsetY = imageCenterY - ((int) (zoom * imageInfo.image.getHeight() / 2));
 
-        imageInfo.displayImage = new BufferedImage(4 + (int) (zoom * imageInfo.image.getWidth()), 4 + (int) (zoom * imageInfo.image.getHeight()), BufferedImage.TYPE_INT_ARGB);
-
-        Graphics graphics = imageInfo.displayImage.getGraphics();
-        graphics.setColor(new java.awt.Color(0xFFD575EA));
-        graphics.drawRect(0, 0, imageInfo.displayImage.getWidth() - 1, imageInfo.displayImage.getHeight() - 1);
-        graphics.setColor(new java.awt.Color(0xFFDA9BE8));
-        graphics.drawRect(1, 1, imageInfo.displayImage.getWidth() - 3, imageInfo.displayImage.getHeight() - 3);
+        resetDisplayImage();
 
         processDisplayImage();
     }
@@ -173,7 +160,7 @@ public class Controller
             imageCenterX = dragOffsetX + (imageInfo.displayImage.getWidth() / 2);
             imageCenterY = dragOffsetY + (imageInfo.displayImage.getHeight() / 2);
 
-            drawImage();
+            customJPanel.repaint();
         }
     }
 
@@ -183,7 +170,8 @@ public class Controller
         mouseHeld = false;
     }
 
-    @FXML private void mouseMoved(MouseEvent e)
+    @FXML
+    private void mouseMoved(MouseEvent e)
     {
         if (imageInfo == null)
             return;
@@ -205,7 +193,7 @@ public class Controller
                         for (double j = pixelY * zoom; j <= (pixelY + 1) * zoom; j++)
                             imageInfo.displayImage.setRGB((int) i, (int) j, 0xFF000000);
 
-                    drawImage();
+                    customJPanel.repaint();
                 }
             }
     }
@@ -226,6 +214,87 @@ public class Controller
             }
             y2 += y_ratio;
         }
+    }
+
+    @FXML
+    private void flipV()
+    {
+        AffineTransform affineTransform = new AffineTransform();
+        affineTransform.concatenate(AffineTransform.getScaleInstance(1, -1));
+        affineTransform.concatenate(AffineTransform.getTranslateInstance(0, -imageInfo.image.getHeight()));
+        AffineTransformOp affineTransformOp = new AffineTransformOp(affineTransform, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+        imageInfo.image = affineTransformOp.filter(imageInfo.image, null);
+
+        processDisplayImage();
+    }
+
+    @FXML
+    private void flipH()
+    {
+        AffineTransform affineTransform = new AffineTransform();
+        affineTransform.concatenate(AffineTransform.getScaleInstance(-1, 1));
+        affineTransform.concatenate(AffineTransform.getTranslateInstance(-imageInfo.image.getWidth(), 0));
+        AffineTransformOp affineTransformOp = new AffineTransformOp(affineTransform, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+        imageInfo.image = affineTransformOp.filter(imageInfo.image, null);
+
+        processDisplayImage();
+    }
+
+    @FXML
+    private void rotateCW()
+    {
+        performRotation();
+
+        resetDisplayImage();
+        processDisplayImage();
+    }
+
+    private void resetDisplayImage()
+    {
+        imageInfo.displayImage = new BufferedImage(4 + (int) (zoom * imageInfo.image.getWidth()), 4 + (int) (zoom * imageInfo.image.getHeight()), BufferedImage.TYPE_INT_ARGB);
+
+        Graphics graphics = imageInfo.displayImage.getGraphics();
+        graphics.setColor(new java.awt.Color(0xFFD575EA));
+        graphics.drawRect(0, 0, imageInfo.displayImage.getWidth() - 1, imageInfo.displayImage.getHeight() - 1);
+        graphics.setColor(new java.awt.Color(0xFFDA9BE8));
+        graphics.drawRect(1, 1, imageInfo.displayImage.getWidth() - 3, imageInfo.displayImage.getHeight() - 3);
+    }
+
+    @FXML
+    private void rotateCCW()
+    {
+        //loop unrolling for efficiency
+        rotateCW();
+        rotateCW();
+        rotateCW();
+
+        resetDisplayImage();
+        processDisplayImage();
+    }
+
+    private void performRotation()
+    {
+        BufferedImage temp = new BufferedImage(imageInfo.image.getHeight(), imageInfo.image.getWidth(), BufferedImage.TYPE_INT_ARGB);
+
+        int[] in = ((DataBufferInt) imageInfo.image.getRaster().getDataBuffer()).getData();
+        int[] out = ((DataBufferInt) temp.getRaster().getDataBuffer()).getData();
+
+        int width = imageInfo.image.getWidth();
+        int height = imageInfo.image.getHeight();
+
+        for (int i = 0; i < width; i++)
+            for (int j = 0; j < height; j++)
+                out[(i * height) + j] = in[i + (j * width)];
+
+        imageInfo.image = temp;
+
+        flipH();
+    }
+
+    void resetCenter()
+    {
+        imageCenterX = displayWidth / 2;
+        imageCenterY = displayHeight / 2;
     }
 
     void init(Stage stage)

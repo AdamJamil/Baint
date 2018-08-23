@@ -9,9 +9,13 @@
    <top>
       <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
-             <Button fx:id="newButton" mnemonicParsing="false" onAction="#newButtonPressed" text="New" />
-             <Button fx:id="openButton" mnemonicParsing="false" onAction="#openButtonPressed" text="Open" />
+            <Button fx:id="newButton" mnemonicParsing="false" onAction="#newButtonPressed" text="New" />
+            <Button fx:id="openButton" mnemonicParsing="false" onAction="#openButtonPressed" text="Open" />
             <Button mnemonicParsing="false" onAction="#resizeButtonPressed" text="Resize" />
+            <Button mnemonicParsing="false" onAction="#flipV" text="Flip (V)" />
+            <Button mnemonicParsing="false" onAction="#flipH" text="Flip (H)" />
+            <Button mnemonicParsing="false" onAction="#rotateCW" text="Rotate (CW)" />
+            <Button mnemonicParsing="false" onAction="#rotateCCW" text="Rotate (CCW)" />
             <Text fx:id="mouseInfo" strokeType="OUTSIDE" strokeWidth="0.0" />
          </children>
       </HBox>
