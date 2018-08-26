@@ -2,6 +2,8 @@ package sample;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
@@ -25,6 +27,8 @@ public class Controller
     Stage stage;
     FileChooser fileChooser;
 
+    private boolean rectangleSelect = false;
+    private int rectangleSelectX = -1, rectangleSelectY = -1;
     private boolean mouseHeld = false;
     int dragOffsetX = 0, dragOffsetY = 0;
     int displayWidth, displayHeight;
@@ -34,8 +38,6 @@ public class Controller
     private File file;
 
     ImageInfo info;
-
-    PixelSelection pixelSelection;
 
     FlipRotateResize mule = new FlipRotateResize();
     DrawPipeline pipeline;
@@ -69,6 +71,7 @@ public class Controller
         dragOffsetY = imageCenterY - ((int) (info.zoom * info.image.getHeight() / 2));
 
         pipeline.resetDisplayImage(info);
+        info.selection = null;
     }
 
     @FXML private void openButtonPressed() throws Exception
@@ -78,10 +81,10 @@ public class Controller
 
     @FXML private void newButtonPressed()
     {
-        BufferedImage image = new BufferedImage(displayWidth / 2, displayHeight / 2, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage image = new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB);
 
-        for (int i = 0; i < displayWidth / 2; i++)
-            for (int j = 0; j < displayHeight / 2; j++)
+        for (int i = 0; i < 10; i++)
+            for (int j = 0; j < 10; j++)
                 image.setRGB(i, j, 0xFFFFFFFF);
 
         loadImage(image);
@@ -106,7 +109,7 @@ public class Controller
     private void mouseScroll(ScrollEvent e)
     {
         info.zoomLevel += (e.getDeltaY() > 0) ? 1 : -1;
-        info.zoomLevel = Math.max(0, Math.min(info.zoomLevel, 22));
+        info.zoomLevel = Math.max(0, Math.min(info.zoomLevel, ImageInfo.zoomLevels.length - 1));
 
         info.zoom = ImageInfo.zoomLevels[info.zoomLevel];
 
@@ -159,8 +162,8 @@ public class Controller
         if (info == null)
             return;
 
-        mouseX = e.getX();
-        mouseY = e.getY();
+        mouseX = e.getX() + 2;
+        mouseY = e.getY() + 2;
 
         if (dragOffsetX + 2 <= mouseX && mouseX < dragOffsetX + info.displayImage.getWidth() - 2)
             if (dragOffsetY + 2 <= mouseY && mouseY < dragOffsetY + info.displayImage.getHeight() - 2)
@@ -171,14 +174,56 @@ public class Controller
 
                 if (e.isAltDown())
                 {
-                    info.image.setRGB(pixelX, pixelY, 0xFF000000);
-                    for (double i = pixelX * info.zoom; i <= (pixelX + 1) * info.zoom; i++)
-                        for (double j = pixelY * info.zoom; j <= (pixelY + 1) * info.zoom; j++)
-                            info.displayImage.setRGB((int) i, (int) j, 0xFF000000);
+                    int color = 0xFF000000 + (int) (Math.random() * 0xFFFFFF);
+                    info.image.setRGB(pixelX, pixelY, color);
+                    for (double i = pixelX * info.zoom; i < (pixelX + 1) * info.zoom; i++)
+                        for (double j = pixelY * info.zoom; j < (pixelY + 1) * info.zoom; j++)
+                            info.displayImage.setRGB((int) i + 2, (int) j + 2, color);
 
-                    customJPanel.repaint();
+                    pipeline.draw();
+                }
+
+                if (rectangleSelect)
+                {
+                    if (info.selection == null)
+                        info.selection = new PixelSelection(this);
+
+                    if (rectangleSelectX == -1)
+                    {
+                        rectangleSelectX = pixelX;
+                        rectangleSelectY = pixelY;
+                    }
+
+                    for (int i = 0; i < info.image.getWidth(); i++)
+                        for (int j = 0; j < info.image.getHeight(); j++)
+                            info.selection.removePixel(i, j);
+
+                    for (int i = Math.min(pixelX, rectangleSelectX); i <= Math.max(pixelX, rectangleSelectX); i++)
+                        for (int j = Math.min(pixelY, rectangleSelectY); j <= Math.max(pixelY, rectangleSelectY); j++)
+                            info.selection.addPixel(i, j);
                 }
             }
+    }
+
+    private void keyPressed(KeyEvent event)
+    {
+        if (event.isControlDown())
+            rectangleSelect = true;
+
+        if (event.getCode() == KeyCode.ESCAPE || event.getCode() == KeyCode.ENTER)
+        {
+            info.selection.dispose = true;
+            info.selection = null;
+        }
+    }
+
+    private void keyReleased(KeyEvent event)
+    {
+        if (!event.isControlDown())
+        {
+            rectangleSelect = false;
+            rectangleSelectX = -1;
+        }
     }
 
     @FXML
@@ -225,6 +270,8 @@ public class Controller
         customJPanel.swingNode.setOnMouseReleased(this::mouseReleased);
         customJPanel.swingNode.setOnScroll(this::mouseScroll);
         customJPanel.swingNode.setOnMouseMoved(this::mouseMoved);
+        customJPanel.swingNode.setOnKeyPressed(this::keyPressed);
+        customJPanel.swingNode.setOnKeyReleased(this::keyReleased);
 
         canvas = customJPanel.getCanvas();
 

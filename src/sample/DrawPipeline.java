@@ -29,6 +29,9 @@ class DrawPipeline
         FlipRotateResize.resizePixels(((DataBufferInt) info.image.getRaster().getDataBuffer()).getData(), ((DataBufferInt) info.displayImage.getRaster().getDataBuffer()).getData(),
                 info.image.getWidth(), info.image.getHeight(), (int) (info.image.getWidth() * info.zoom), (int) (info.image.getHeight() * info.zoom));
 
+        if (info.selection != null)
+            info.selection.image = new BufferedImage(info.displayImage.getWidth() + 6, info.displayImage.getHeight() + 6, BufferedImage.TYPE_INT_ARGB);
+
         draw();
     }
 

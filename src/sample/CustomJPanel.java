@@ -17,7 +17,12 @@ class CustomJPanel extends JPanel
 
         g.clearRect(0, 0, controller.displayWidth, controller.displayHeight);
         if (controller.info != null)
-            g.drawImage(controller.info.displayImage, controller.dragOffsetX, controller.dragOffsetY, null);
+        {
+            if (controller.info.selection == null)
+                g.drawImage(controller.info.displayImage, controller.dragOffsetX, controller.dragOffsetY, null);
+            else
+                g.drawImage(controller.info.selection.image, controller.dragOffsetX - 3, controller.dragOffsetY - 3, null);
+        }
     }
 
     CustomJPanel(Controller controller)
