@@ -5,9 +5,9 @@
 💯💯🔥🔥 5. zoom
 💯💯🔥🔥 6. resize image
 💯💯🔥🔥 7. basic ui information
-8. flip/rotate image
-9. save image over previous iteration
-10. save as different file types
+💯💯🔥🔥 8. flip/rotate image
+💯💯🔥🔥 9. save image over previous iteration
+💯💯🔥🔥 10. save as different file types
 11. rectangular pixel selections
 12. drag pixel selection
 13. cut/copy and paste selection
