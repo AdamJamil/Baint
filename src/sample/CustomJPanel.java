@@ -23,6 +23,8 @@ class CustomJPanel extends JPanel
             else
                 g.drawImage(controller.info.selection.image, controller.dragOffsetX - 3, controller.dragOffsetY - 3, null);
         }
+        else
+            System.out.println("lol");
     }
 
     CustomJPanel(Controller controller)

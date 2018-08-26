@@ -187,16 +187,14 @@ public class Controller
                 {
                     if (info.selection == null)
                         info.selection = new PixelSelection(this);
+                    else
+                        info.selection.reset();
 
                     if (rectangleSelectX == -1)
                     {
                         rectangleSelectX = pixelX;
                         rectangleSelectY = pixelY;
                     }
-
-                    for (int i = 0; i < info.image.getWidth(); i++)
-                        for (int j = 0; j < info.image.getHeight(); j++)
-                            info.selection.removePixel(i, j);
 
                     for (int i = Math.min(pixelX, rectangleSelectX); i <= Math.max(pixelX, rectangleSelectX); i++)
                         for (int j = Math.min(pixelY, rectangleSelectY); j <= Math.max(pixelY, rectangleSelectY); j++)
@@ -270,8 +268,15 @@ public class Controller
         customJPanel.swingNode.setOnMouseReleased(this::mouseReleased);
         customJPanel.swingNode.setOnScroll(this::mouseScroll);
         customJPanel.swingNode.setOnMouseMoved(this::mouseMoved);
-        customJPanel.swingNode.setOnKeyPressed(this::keyPressed);
-        customJPanel.swingNode.setOnKeyReleased(this::keyReleased);
+        stage.getScene().setOnKeyPressed(this::keyPressed);
+        stage.getScene().setOnKeyReleased(this::keyReleased);
+
+        stage.setOnCloseRequest((e) ->
+        {
+            stage.getOnCloseRequest();
+            if (info != null && info.selection != null)
+                info.selection.dispose = true;
+        });
 
         canvas = customJPanel.getCanvas();
 

@@ -79,6 +79,15 @@ class PixelSelection
             boundaryUp[x + 1][y] = true;
     }
 
+    void reset()
+    {
+        selected = new boolean[height][width];
+        boundaryUp = new boolean[height][width];
+        boundaryDown = new boolean[height][width];
+        boundaryLeft = new boolean[height][width];
+        boundaryRight = new boolean[height][width];
+    }
+
     PixelSelection(Controller controller)
     {
         this.controller = controller;
