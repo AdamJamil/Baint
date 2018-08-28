@@ -54,6 +54,23 @@ class PixelSelection
         }
     }
 
+    void setRectangle(int y, int x, int endY, int endX)
+    {
+        for (int i = y; i <= endY; i++)
+        {
+            for (int j = x; j < endX; j++)
+                selected[x][y] = true;
+            boundaryUp[x][i] = true;
+            boundaryDown[endX][i] = true;
+        }
+
+        for (int i = x; i <= endX; i++)
+        {
+            boundaryLeft[i][y] = true;
+            boundaryRight[i][endY] = true;
+        }
+    }
+
     void removePixel(int y, int x)
     {
         if (!selected[x][y])
@@ -143,6 +160,15 @@ class PixelSelection
                 blink %= 15;
 
                 controller.pipeline.draw();
+            }
+
+            try
+            {
+                Thread.sleep(2);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
             }
         }
     }

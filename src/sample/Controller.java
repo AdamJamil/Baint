@@ -196,9 +196,9 @@ public class Controller
                         rectangleSelectY = pixelY;
                     }
 
-                    for (int i = Math.min(pixelX, rectangleSelectX); i <= Math.max(pixelX, rectangleSelectX); i++)
-                        for (int j = Math.min(pixelY, rectangleSelectY); j <= Math.max(pixelY, rectangleSelectY); j++)
-                            info.selection.addPixel(i, j);
+                    info.selection.setRectangle(Math.min(rectangleSelectX, pixelX), Math.min(rectangleSelectY, pixelY), Math.max(rectangleSelectX, pixelX), Math.max(rectangleSelectY, pixelY));
+
+                    pipeline.draw();
                 }
             }
     }
