@@ -29,6 +29,7 @@ public class Controller
 
     private boolean rectangleSelect = false;
     private int rectangleSelectX = -1, rectangleSelectY = -1;
+    private int cursor = 0;
     private boolean mouseHeld = false;
     int dragOffsetX = 0, dragOffsetY = 0;
     int displayWidth, displayHeight;
@@ -81,10 +82,12 @@ public class Controller
 
     @FXML private void newButtonPressed()
     {
-        BufferedImage image = new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB);
+        int newWidth = 30;
+        int newHeight = 10;
+        BufferedImage image = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
 
-        for (int i = 0; i < 10; i++)
-            for (int j = 0; j < 10; j++)
+        for (int i = 0; i < newWidth; i++)
+            for (int j = 0; j < newHeight; j++)
                 image.setRGB(i, j, 0xFFFFFFFF);
 
         loadImage(image);
@@ -130,7 +133,7 @@ public class Controller
     @FXML
     private void mouseDragged(MouseEvent e)
     {
-        if (mouseHeld)
+        if (cursor == Cursor.PAN)
         {
             dragOffsetX += e.getX() - mousePressedX;
             dragOffsetY += e.getY() - mousePressedY;
@@ -147,6 +150,14 @@ public class Controller
             imageCenterY = dragOffsetY + (info.displayImage.getHeight() / 2);
 
             customJPanel.repaint();
+        }
+        else if (cursor == Cursor.DRAG && info.selection != null)
+        {
+            if (!info.selection.lifted)
+                info.selection.lift();
+            info.selection.drag((int) (e.getX() - mousePressedX), (int) (e.getY() - mousePressedY));
+            mousePressedX = e.getX();
+            mousePressedY = e.getY();
         }
     }
 
@@ -210,8 +221,16 @@ public class Controller
 
         if (event.getCode() == KeyCode.ESCAPE || event.getCode() == KeyCode.ENTER)
         {
+            info.selection.place();
             info.selection.dispose = true;
             info.selection = null;
+            pipeline.processDisplayImage(info);
+        }
+
+        if (event.getCode() == KeyCode.D)
+        {
+            cursor -= 1;
+            cursor *= -1;
         }
     }
 
@@ -288,6 +307,8 @@ public class Controller
         canvas.setPreferredSize(new Dimension(displayWidth, displayHeight));
 
         pipeline = new DrawPipeline(customJPanel);
+
+        newButtonPressed();
     }
 
     private String getFileExtension(File file)

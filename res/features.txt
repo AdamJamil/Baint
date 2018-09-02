@@ -9,7 +9,7 @@
 💯💯🔥🔥 9. save image over previous iteration
 💯💯🔥🔥 10. save as different file types
 💯💯🔥🔥 11. rectangular pixel selections
-12. drag pixel selection
+💯💯🔥🔥 12. drag pixel selection
 13. cut/copy and paste selection
 14. advanced ui information
 15. multiple tabs of images
